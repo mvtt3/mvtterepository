@@ -1,0 +1,123 @@
+/* Stile globale */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f9;
+  padding: 40px;
+  color: #333;
+  margin: 0;
+  min-height: 100vh;
+}
+
+h1 {
+  color: #34495e;
+  margin-bottom: 30px;
+  text-align: center;
+  font-size: 2.5em;
+}
+
+/* Form */
+input[type="file"],
+input[type="text"],
+input[type="number"],
+button {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 20px;
+  width: 300px;
+  font-size: 16px;
+}
+
+input[type="file"]:hover,
+input[type="text"]:hover,
+input[type="number"]:hover,
+button:hover {
+  border-color: #3498db;
+}
+
+input[type="file"],
+input[type="text"],
+input[type="number"] {
+  background-color: #fff;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+button {
+  background-color: #3498db;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: auto;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
+
+button:active {
+  background-color: #1f6f9b;
+}
+
+/* Container per l'output */
+#output {
+  margin-top: 30px;
+}
+
+/* Tabella risultati */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 20px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+td, th {
+  border: 1px solid #ddd;
+  padding: 15px;
+  text-align: left;
+}
+
+th {
+  background-color: #2c3e50;
+  color: white;
+  font-size: 18px;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Stile dell'icona di download */
+#downloadIcon {
+  display: none;
+  margin-left: 20px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+#downloadIcon.show {
+  display: inline-block;
+}
+
+/* Animazione quando compare il risultato */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+#output table {
+  animation: fadeIn 0.5s ease;
+}

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Confronto Excel</title>
+  <link rel="stylesheet" href="cstyle.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+  <h1>Confronto File Excel</h1>
+
+  <input type="file" id="file1" accept=".xls,.xlsx,.xlsm" />
+  <input type="file" id="file2" accept=".xls,.xlsx,.xlsm" />
+
+  <label>Lettera colonna file 1 da confrontare:</label>
+  <input type="text" id="colFile1" placeholder="Es. B" maxlength="2" />
+
+  <label>Lettera colonna file 2 da confrontare:</label>
+  <input type="text" id="colFile2" placeholder="Es. B" maxlength="2" />
+
+  <label>Lettera colonna file 1 da mostrare (opzionale):</label>
+  <input type="text" id="colShow1" placeholder="Es. A" maxlength="2" />
+
+  <label>Lettera colonna file 2 da mostrare (opzionale):</label>
+  <input type="text" id="colShow2" placeholder="Es. A" maxlength="2" />
+
+  <label>Soglia di similarità (%):</label>
+  <input type="number" id="similarityThreshold" placeholder="Es. 50" min="1" max="100" value="50" />
+
+  <button id="compareBtn" onclick="compareFiles()" disabled>Confronta</button>
+  <button onclick="downloadExcel()">Scarica risultati</button>
+
+  <div id="downloadIcon" class="download-icon">📥</div>
+
+  <div id="output"></div>
+
+  <script>
+    let data1 = [], data2 = [], results = [];
+
+    function readExcelFile(file, callback) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+        callback(json);
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function columnLetterToIndex(letter) {
+      let col = 0;
+      for (let i = 0; i < letter.length; i++) {
+        col *= 26;
+        col += letter.charCodeAt(i) - 'A'.charCodeAt(0) + 1;
+      }
+      return col - 1;
+    }
+
+    function normalize(str) {
+      return str?.toString().toLowerCase().replace(/[^a-z0-9]/gi, '').trim();
+    }
+
+    function getFuzzyScore(a, b) {
+      if (!a || !b) return 0;
+      let matches = 0;
+      for (let i = 0; i < Math.min(a.length, b.length); i++) {
+        if (a[i] === b[i]) matches++;
+      }
+      return Math.round((matches / Math.max(a.length, b.length)) * 100);
+    }
+
+    document.getElementById('file1').addEventListener('change', function() {
+      readExcelFile(this.files[0], json => { data1 = json; });
+    });
+
+    document.getElementById('file2').addEventListener('change', function() {
+      readExcelFile(this.files[0], json => { data2 = json; });
+    });
+
+    document.getElementById('similarityThreshold').addEventListener('input', function () {
+      const val = parseInt(this.value);
+      document.getElementById('compareBtn').disabled = isNaN(val) || val < 1 || val > 100;
+    });
+
+    function compareFiles() {
+      document.getElementById('downloadIcon').classList.add('show');
+
+      const colLetters1 = document.getElementById('colFile1').value.toUpperCase().split(',');
+      const colLetters2 = document.getElementById('colFile2').value.toUpperCase().split(',');
+
+      const colIndexes1 = colLetters1.map(letter => columnLetterToIndex(letter.trim()));
+      const colIndexes2 = colLetters2.map(letter => columnLetterToIndex(letter.trim()));
+
+      const colShow1 = document.getElementById('colShow1').value.toUpperCase().trim();
+      const colShow2 = document.getElementById('colShow2').value.toUpperCase().trim();
+      const colShowIndex1 = colShow1 ? columnLetterToIndex(colShow1) : null;
+      const colShowIndex2 = colShow2 ? columnLetterToIndex(colShow2) : null;
+
+      const threshold = parseInt(document.getElementById('similarityThreshold').value) || 50;
+
+      results = [];
+
+      data1.forEach(row1 => {
+        let bestMatch = null;
+        let highestScore = 0;
+        let bestRawVal2 = "";
+        let bestRow2 = null;
+
+        const val1 = colIndexes1.map(index => normalize(row1[index])).join(' ');
+
+        data2.forEach(row2 => {
+          const val2 = colIndexes2.map(index => normalize(row2[index])).join(' ');
+          const score = getFuzzyScore(val1, val2);
+
+          if (score > highestScore) {
+            highestScore = score;
+            bestRawVal2 = colIndexes2.map(index => row2[index]).join(' ');
+            bestRow2 = row2;
+          }
+        });
+
+        if (highestScore >= threshold) {
+          results.push({
+            'Valore File 1': colIndexes1.map(index => row1[index]).join(' '),
+            'Contesto File 1': colShowIndex1 !== null ? row1[colShowIndex1] : '',
+            'Valore File 2': bestRawVal2,
+            'Contesto File 2': colShowIndex2 !== null ? bestRow2?.[colShowIndex2] : '',
+            'Similarità': highestScore + '%'
+          });
+        }
+      });
+
+      displayResults(results);
+    }
+
+    function displayResults(matches) {
+      const output = document.getElementById('output');
+      if (!matches.length) {
+        output.innerHTML = '<p>Nessuna corrispondenza trovata.</p>';
+        document.getElementById('downloadIcon').classList.remove('show');
+        return;
+      }
+
+      let html = `
+        <table>
+          <tr>
+            <th>Valore File 1</th>
+            <th>Contesto File 1</th>
+            <th>Valore File 2</th>
+            <th>Contesto File 2</th>
+            <th>Similarità</th>
+          </tr>
+      `;
+
+      matches.forEach(match => {
+        html += `
+          <tr>
+            <td>${match['Valore File 1']}</td>
+            <td>${match['Contesto File 1']}</td>
+            <td>${match['Valore File 2']}</td>
+            <td>${match['Contesto File 2']}</td>
+            <td>${match['Similarità']}</td>
+          </tr>
+        `;
+      });
+
+      html += '</table>';
+      output.innerHTML = html;
+
+      document.getElementById('downloadIcon').classList.remove('show');
+    }
+
+    function downloadExcel() {
+      if (results.length === 0) {
+        alert("Nessun risultato da scaricare.");
+        return;
+      }
+      const ws = XLSX.utils.json_to_sheet(results);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Risultati");
+      XLSX.writeFile(wb, "risultati_confronto.xlsx");
+    }
+  </script>
+</body>
+</html>
