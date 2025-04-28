@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galleria Carte 3D</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            padding: 2rem;
+        }
+        
+        .gallery-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+        
+        .card-container {
+            margin-bottom: 3rem;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        
+        .card {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border-radius: 12px;
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .card-front {
+            background-color: #fff;
+            overflow: hidden;
+        }
+        
+        .card-front img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .card-back {
+            background-color: #3498db;
+            color: white;
+            transform: rotateY(180deg);
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .card-back h2 {
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+        
+        .card-back p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+        }
+        
+        .flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .instructions {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="gallery-container">
+        <h1>Galleria Carte Interattive</h1>
+        
+        <div class="instructions">
+            Clicca sulle immagini per vedere le informazioni
+        </div>
+        
+        <div class="card-container">
+            <div class="card">
+                <div class="card-front">
+                    <img src="/api/placeholder/800/400" alt="Immagine 1">
+                </div>
+                <div class="card-back">
+                    <h2>Titolo 1</h2>
+                    <p>Queste sono le informazioni sulla prima immagine. Puoi inserire qui qualsiasi dettaglio desideri mostrare quando la carta viene girata.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-container">
+            <div class="card">
+                <div class="card-front">
+                    <img src="/api/placeholder/800/400" alt="Immagine 2">
+                </div>
+                <div class="card-back">
+                    <h2>Titolo 2</h2>
+                    <p>Queste sono le informazioni sulla seconda immagine. Puoi aggiungere dettagli su luoghi, persone o qualsiasi cosa sia rappresentata nell'immagine.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-container">
+            <div class="card">
+                <div class="card-front">
+                    <img src="/api/placeholder/800/400" alt="Immagine 3">
+                </div>
+                <div class="card-back">
+                    <h2>Titolo 3</h2>
+                    <p>Qui puoi aggiungere una descrizione dettagliata della terza immagine. Scrivi tutte le informazioni che vuoi presentare ai visitatori del sito.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-container">
+            <div class="card">
+                <div class="card-front">
+                    <img src="/api/placeholder/800/400" alt="Immagine 4">
+                </div>
+                <div class="card-back">
+                    <h2>Titolo 4</h2>
+                    <p>Questa è la quarta carta della galleria. Aggiungi qui tutte le informazioni rilevanti che vuoi mostrare quando l'utente clicca sull'immagine.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Aggiunge l'event listener a tutte le carte
+        document.querySelectorAll('.card-container').forEach(card => {
+            card.addEventListener('click', function() {
+                const cardElement = this.querySelector('.card');
+                cardElement.classList.toggle('flipped');
+            });
+        });
+    </script>
+</body>
+</html>
